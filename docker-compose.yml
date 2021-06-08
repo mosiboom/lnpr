@@ -1,0 +1,65 @@
+#定义当前版本
+version: "3"
+#定义我们的服务对象
+services:   
+#自定义的服务名称
+  nginx:    
+    #镜像名称，默认拉取本地镜像，没有的话从远程获取
+    image: harbor.docker.pthc7.com/whale/nginx1.15:v1.0.0
+    #自定义容器的名称
+    container_name: nginx_dk
+    #将宿主机的5000端口映射到容器的80端口
+    ports:
+      - "80:80"
+      - "443:443"
+      # 将会映射8080到8085这个范围内的端口
+      - 8080-8085:8080-8085
+    #将宿主机的./www目录和容器的/var/www/html目录进行绑定，并设置rw权限
+    volumes:
+      - ./project:/data/project:rw
+      - ./nginx/nginx:/etc/nginx:rw
+      - ./nginx/cert:/data/cert:rw
+      - /data/logs/nginx:/data/logs/nginx:rw
+      #容器只能从主机的/ etc / localtime读取
+      - /etc/localtime:/etc/localtime:ro
+    #容器是否随docker服务启动重启
+    restart: always
+    #容器加入名为default的网络
+    networks:
+      - default
+
+  php:
+    image: harbor.docker.pthc7.com/whale/php7.2:v1.0.6
+    container_name: php_dk
+    volumes:
+      - ./php/etc:/usr/local/etc:rw
+      - ./project:/data/project:rw
+      - /data/logs/php:/data/logs/php:rw
+      #容器只能从主机的/ etc / localtime读取
+      - /etc/localtime:/etc/localtime:ro
+    restart: always
+    cap_add:
+      - SYS_PTRACE
+    networks:
+      - default
+
+  redis:
+    #hostname: redis_dk
+    image: harbor.docker.pthc7.com/whale/redis4:v1.0.0
+    container_name: redis_dk
+    restart: always
+    command: redis-server /etc/redis.conf # 启动redis命令
+    volumes:
+      - ./redis/data:/data:rw
+      - ./redis/redis.conf:/etc/redis.conf:rw
+      #容器只能从主机的/ etc / localtime读取
+      - /etc/localtime:/etc/localtime:ro
+    #ports:
+      #- "6399:6379"
+    network_mode: service:php
+    depends_on:
+      - php
+
+networks:   
+  #创建了一个自定义的网络叫做default
+  default:
