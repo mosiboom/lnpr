@@ -1,11 +1,5 @@
 ## 项目说明
 
-> 项目归属
-  - docker-composer部署lnmp运行环境
-  - 开发者：平台技术部-michael
-  - version 1.0-release
-  - time: 2020-10-20 17:20:00
-
 > 项目部署规范
   - CentOS Linux release 7.8.2003 (Core)
   - Docker version >= 19.03.12
