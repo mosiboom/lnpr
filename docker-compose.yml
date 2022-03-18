@@ -5,7 +5,7 @@ services:
 #自定义的服务名称
   nginx:
     #镜像名称，默认拉取本地镜像，没有的话从远程获取
-    image: harbor.docker.pthc7.com/whale/nginx1.15:v1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/jasper_kd/nginx:v1.0
     #自定义容器的名称
     container_name: nginx-server
     #将宿主机的5000端口映射到容器的80端口
@@ -16,10 +16,10 @@ services:
       - 8080-8085:8080-8085
     #将宿主机的./www目录和容器的/var/www/html目录进行绑定，并设置rw权限
     volumes:
-      - /var/www/project:/data/project:rw
+      - ～/code:/code:rw
       - ./nginx/nginx:/etc/nginx:rw
       - ./nginx/cert:/data/cert:rw
-      - /var/www/logs/nginx:/data/logs/nginx:rw
+      - ～/www/logs/nginx:/www/logs/nginx:rw
       #容器只能从主机的/ etc / localtime读取
       - /etc/localtime:/etc/localtime:ro
     #容器是否随docker服务启动重启
@@ -29,12 +29,12 @@ services:
       - default
 
   php:
-    image: harbor.docker.pthc7.com/whale/php7.2:v1.0.6
+    image: registry.cn-hangzhou.aliyuncs.com/jasper_kd/php7.4:v1.0
     container_name: php-container
     volumes:
       - ./php/etc:/usr/local/etc:rw
-      - /var/www/project:/data/project:rw
-      - /var/www/logs/php:/data/logs/php:rw
+      - ～/code:/code:rw
+      - ～/www/logs/php:/www/logs/php:rw
       #容器只能从主机的/ etc / localtime读取
       - /etc/localtime:/etc/localtime:ro
     restart: always
@@ -48,7 +48,7 @@ services:
 
   redis:
     #hostname: redis_dk
-    image: harbor.docker.pthc7.com/whale/redis4:v1.0.0
+    image: registry.cn-hangzhou.aliyuncs.com/jasper_kd/redis4:v1.0
     container_name: redis-server
     restart: always
     command: redis-server /etc/redis.conf # 启动redis命令
@@ -63,25 +63,25 @@ services:
     depends_on:
       - php
   # 数据库，如果不使用的话就关掉
-  mysql:
-    image: harbor.docker.pthc7.com/whale/mysql5.7:v1.0.0
-    container_name: mysql-server
-#    ports:
-#      - "3366:3306"
-    volumes:
-      - ./mysql/data:/var/lib/mysql/:rw
-      - ./mysql/conf.d:/etc/mysql/conf.d
-      #容器只能从主机的/ etc / localtime读取
-      - /etc/localtime:/etc/localtime:ro
-    restart: always
-#    networks:
-#      - default
-    environment:
-      # 默认root密码，记得改掉
-      MYSQL_ROOT_PASSWORD: "c018edf028e98547173fd3af31d30733"
-    network_mode: service:php
-    depends_on:
-        - php
+#  mysql:
+#    image: registry.cn-hangzhou.aliyuncs.com/jasper_kd/mysql5.7:v.10
+#    container_name: mysql-server
+#    #    ports:
+#    #      - "3366:3306"
+#    volumes:
+#      - ./mysql/data:/var/lib/mysql/:rw
+#      - ./mysql/conf.d:/etc/mysql/conf.d
+#      #容器只能从主机的/ etc / localtime读取
+#      - /etc/localtime:/etc/localtime:ro
+#    restart: always
+#    #    networks:
+#    #      - default
+#    environment:
+#      # 默认root密码，记得改掉
+#      MYSQL_ROOT_PASSWORD: "c018edf028e98547173fd3af31d30733"
+#    network_mode: service:php
+#    depends_on:
+#      - php
 networks:
   #创建了一个自定义的网络叫做default
   default:
